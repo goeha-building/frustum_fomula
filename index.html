@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>뿔대 부피 오차 증명</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px; }
+        input { width: 100px; padding: 5px; margin: 10px; }
+        .result { background: #f4f4f4; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🏛️ 고대 문명 뿔대 부피 오차 분석</h2>
+    <p>밑면(a), 윗면(b), 높이(h)를 넣으면 오차가 자동으로 계산됩니다.</p>
+    
+    밑면 a: <input type="number" id="a" value="10"> 
+    윗면 b: <input type="number" id="b" value="5"> 
+    높이 h: <input type="number" id="h" value="15">
+    <button onclick="calculate()">데이터로 패버리기</button>
+
+    <div class="result" id="output">
+        여기에 결과가 나옵니다.
+    </div>
+</div>
+
+<script>
+function calculate() {
+    const a = parseFloat(document.getElementById('a').value);
+    const b = parseFloat(document.getElementById('b').value);
+    const h = parseFloat(document.getElementById('h').value);
+
+    const v_babylon = ((a**2 + b**2) / 2) * h;
+    const v_egypt = (1/3) * (a**2 + a*b + b**2) * h;
+    const error = v_babylon - v_egypt;
+    const formula_error = (Math.pow(a - b, 2) / 6) * h;
+
+    document.getElementById('output').innerHTML = `
+        <h3>분석 결과</h3>
+        <p><b>바빌로니아 식 부피:</b> ${v_babylon.toFixed(2)}</p>
+        <p><b>이집트 식 부피:</b> ${v_egypt.toFixed(2)}</p>
+        <p style="color:red;"><b>실제 오차:</b> ${error.toFixed(2)}</p>
+        <p style="color:green;"><b>유도한 오차항 ( (a-b)²/6 * h ) 결과:</b> ${formula_error.toFixed(2)}</p>
+        <hr>
+        <p><b>스승의 한마디:</b> 오차값이 네가 유도한 공식과 소수점까지 일치하는 거 보이지? 바빌로니아 형님들 능지 확인 완료.</p>
+    `;
+}
+</script>
+</body>
+</html>
