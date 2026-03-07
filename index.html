@@ -12,16 +12,18 @@
 </head>
 <body>
 <div class="container">
-    <h2>바빌로니아 뿔대 부피 오차 분석</h2>
-    <p>밑면(a), 윗면(b), 높이(h)를 넣으면 오차가 자동으로 계산됩니다.</p>
+    <h2>바빌로니아&이집트 뿔대 부피식 비교 분석</h2>
+    <p>해당 프로그램은 윗면, 밑면, 높이 값을 넣었을 때 자동으로 오차를 계산해줍니다.</p>
+    <p>바빌로니아 식을 A, 이집트 식을 B라 가정했을 때 두 식의 오차항은 A-B = (a-b)²/6 * h 입니다.</p>
+    <p>실제 계산된 두 부피값의 오차와 유도된 오차항 값은 서로 같다는 것을 확인하실 수 있습니다.</p>
     
     밑면 a: <input type="number" id="a" value="10"> 
     윗면 b: <input type="number" id="b" value="5"> 
     높이 h: <input type="number" id="h" value="15">
-    <button onclick="calculate()">데이터로 패버리기</button>
+    <button onclick="calculate()">계산하기</button>
 
     <div class="result" id="output">
-        여기에 결과가 나옵니다.
+        여기에 계산결과가 표시됩니다.
     </div>
 </div>
 
@@ -37,14 +39,12 @@ function calculate() {
     const formula_error = (Math.pow(a - b, 2) / 6) * h;
 
     document.getElementById('output').innerHTML = `
-        <h3>분석 결과</h3>
+        <h3>계산 결과</h3>
         <p><b>바빌로니아 식 부피:</b> ${v_babylon.toFixed(2)}</p>
         <p><b>이집트 식 부피:</b> ${v_egypt.toFixed(2)}</p>
         <p style="color:red;"><b>실제 오차:</b> ${error.toFixed(2)}</p>
         <p style="color:green;"><b>유도한 오차항 ( (a-b)²/6 * h ) 결과:</b> ${formula_error.toFixed(2)}</p>
-        <hr>
-        <p><b>스승의 한마디:</b> 오차값이 네가 유도한 공식과 소수점까지 일치하는 거 보이지? 바빌로니아 형님들 능지 확인 완료.</p>
-    `;
+        `;
 }
 </script>
 </body>
