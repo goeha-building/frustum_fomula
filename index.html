@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>뿔대 부피 오차 증명</title>
+    <meta charset="UTF-8">
+    <title>바빌로니아&이집트 뿔대 부피식 비교 분석</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
-        .container { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px; }
-        input { width: 100px; padding: 5px; margin: 10px; }
-        .result { background: #f4f4f4; padding: 15px; border-radius: 5px; margin-top: 20px; }
-        canvas { margin-top: 20px; max-height: 400px; }
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; background-color: #f9f9f9; }
+        .container { max-width: 900px; margin: auto; border: 1px solid #ccc; padding: 30px; border-radius: 15px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 20px; padding: 15px; background: #eee; border-radius: 8px; }
+        input { width: 80px; padding: 8px; margin-right: 15px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        .result { background: #f4f4f4; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 5px solid #007bff; }
+        canvas { margin-top: 30px; background: white; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -18,10 +22,12 @@
     <p>바빌로니아 식을 A, 이집트 식을 B라 가정했을 때 두 식의 오차항은 A-B = (a-b)²/6 * h 입니다.</p>
     <p>실제 계산된 두 부피값의 오차와 유도된 오차항 값은 서로 같다는 것을 확인하실 수 있습니다.</p>
     
-    밑면 a: <input type="number" id="a" value="10"> 
-    윗면 b: <input type="number" id="b" value="5"> 
-    높이 h: <input type="number" id="h" value="15">
-    <button onclick="calculate()">계산하기</button>
+    <div class="input-group">
+        밑면 a: <input type="number" id="a" value="10"> 
+        윗면 b: <input type="number" id="b" value="5"> 
+        높이 h: <input type="number" id="h" value="15">
+        <button onclick="calculate()">계산하기</button>
+    </div>
 
     <div class="result" id="output">
         여기에 계산결과가 표시됩니다.
@@ -38,35 +44,44 @@ function calculate() {
     const b = parseFloat(document.getElementById('b').value);
     const h = parseFloat(document.getElementById('h').value);
 
-    const v_babylon = ((a**2 + b**2) / 2) * h;
-    const v_egypt = (1/3) * (a**2 + a*b + b**2) * h;
+    // 부피 계산
+    const v_babylon = ((Math.pow(a, 2) + Math.pow(b, 2)) / 2) * h;
+    const v_egypt = (1/3) * (Math.pow(a, 2) + a*b + Math.pow(b, 2)) * h;
     const error = v_babylon - v_egypt;
     const formula_error = (Math.pow(a - b, 2) / 6) * h;
 
+    // 결과 출력 (네가 적은 문구 그대로 유지)
     document.getElementById('output').innerHTML = `
         <h3>계산 결과</h3>
         <p><b>바빌로니아 식 부피:</b> ${v_babylon.toFixed(2)}</p>
         <p><b>이집트 식 부피:</b> ${v_egypt.toFixed(2)}</p>
         <p style="color:red;"><b>실제 오차:</b> ${error.toFixed(2)}</p>
         <p style="color:green;"><b>유도한 오차항 ( (a-b)²/6 * h ) 결과:</b> ${formula_error.toFixed(2)}</p>
-        `;
+    `;
 
-    updateChart(a, h);
+    // 그래프 업데이트 (높이에 따른 단면적 변화 시각화)
+    updateChart(a, b, h);
 }
 
-function updateChart(currentA, h) {
+function updateChart(a, b, h) {
     const ctx = document.getElementById('errorChart').getContext('2d');
     const labels = [];
-    const frustumErrors = [];
-    const trapezoidErrors = [];
+    const babylonArea = []; // 산술평균 기반 가설 (직선)
+    const realArea = [];    // 실제 단면적 (곡선)
 
-    // b값을 0부터 20까지 변화시키며 오차 추이 계산
-    for (let bVal = 0; bVal <= 20; bVal += 2) {
-        labels.push(`b=${bVal}`);
-        // 뿔대 오차: (a-b)^2 / 6 * h
-        frustumErrors.push((Math.pow(currentA - bVal, 2) / 6) * h);
-        // 사다리꼴 오차: 언제나 0 (산술평균 공식이 정답이므로)
-        trapezoidErrors.push(0);
+    // 높이를 0(밑면)부터 h(윗면)까지 10단계로 나누어 시뮬레이션
+    for (let i = 0; i <= 10; i++) {
+        let progress = i / 10;
+        labels.push(`높이 ${(h * progress).toFixed(1)}`);
+
+        // 바빌로니아 가설: 단면적이 밑면(a^2)에서 윗면(b^2)까지 직선으로 줄어든다
+        let areaB = (a**2) - ((a**2 - b**2) * progress);
+        babylonArea.push(areaB);
+
+        // 실제(이집트): 한 변의 길이가 직선으로 줄어들므로, 단면적은 그 제곱으로 줄어든다
+        let currentSide = a - (a - b) * progress;
+        let areaR = Math.pow(currentSide, 2);
+        realArea.push(areaR);
     }
 
     if (myChart) { myChart.destroy(); }
@@ -76,27 +91,38 @@ function updateChart(currentA, h) {
         data: {
             labels: labels,
             datasets: [{
-                label: '뿔대 부피 오차 (3D)',
-                data: frustumErrors,
-                borderColor: 'red',
-                fill: false,
-                tension: 0.1
-            }, {
-                label: '사다리꼴 넓이 오차 (2D)',
-                data: trapezoidErrors,
+                label: '바빌로니아 가설 (산술평균 기반 직선)',
+                data: babylonArea,
                 borderColor: 'blue',
+                backgroundColor: 'rgba(0, 0, 255, 0.05)',
                 borderDash: [5, 5],
-                fill: false
+                fill: true,
+                tension: 0
+            }, {
+                label: '실제 단면적 (이차함수적 곡선)',
+                data: realArea,
+                borderColor: 'red',
+                backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                fill: true,
+                tension: 0.2
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                title: { display: true, text: '변의 길이 변화에 따른 오차 비교' }
+                title: { display: true, text: '높이에 따른 단면적 변화 비교 (오차의 시각화)', font: { size: 18 } },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { title: { display: true, text: '단면적 넓이 (S)' } },
+                x: { title: { display: true, text: '바닥으로부터의 높이' } }
             }
         }
     });
 }
+
+// 페이지 로드 시 초기 계산 실행
+window.onload = calculate;
 </script>
 </body>
 </html>
