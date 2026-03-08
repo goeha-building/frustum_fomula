@@ -50,7 +50,7 @@ function calculate() {
     const error = v_babylon - v_egypt;
     const formula_error = (Math.pow(a - b, 2) / 6) * h;
 
-    // 결과 출력 (네가 적은 문구 그대로 유지)
+    // 결과 출력
     document.getElementById('output').innerHTML = `
         <h3>계산 결과</h3>
         <p><b>바빌로니아 식 부피:</b> ${v_babylon.toFixed(2)}</p>
@@ -91,7 +91,7 @@ function updateChart(a, b, h) {
         data: {
             labels: labels,
             datasets: [{
-                label: '바빌로니아 가설 (산술평균 기반 직선)',
+                label: '바빌로니아 공식 (산술평균 기반 직선)',
                 data: babylonArea,
                 borderColor: 'blue',
                 backgroundColor: 'rgba(0, 0, 255, 0.05)',
@@ -110,7 +110,7 @@ function updateChart(a, b, h) {
         options: {
             responsive: true,
             plugins: {
-                title: { display: true, text: '높이에 따른 단면적 변화 비교 (오차의 시각화)', font: { size: 18 } },
+                title: { display: true, text: '높이에 따른 단면적 변화 비교 및 오차 시각화', font: { size: 18 } },
                 tooltip: { mode: 'index', intersect: false }
             },
             scales: {
