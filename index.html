@@ -8,6 +8,7 @@
         .container { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 10px; }
         input { width: 100px; padding: 5px; margin: 10px; }
         .result { background: #f4f4f4; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        canvas { margin-top: 20px; max-height: 400px; }
     </style>
 </head>
 <body>
@@ -25,9 +26,13 @@
     <div class="result" id="output">
         여기에 계산결과가 표시됩니다.
     </div>
+    
+    <canvas id="errorChart"></canvas>
 </div>
 
 <script>
+let myChart = null;
+
 function calculate() {
     const a = parseFloat(document.getElementById('a').value);
     const b = parseFloat(document.getElementById('b').value);
@@ -45,6 +50,52 @@ function calculate() {
         <p style="color:red;"><b>실제 오차:</b> ${error.toFixed(2)}</p>
         <p style="color:green;"><b>유도한 오차항 ( (a-b)²/6 * h ) 결과:</b> ${formula_error.toFixed(2)}</p>
         `;
+
+    updateChart(a, h);
+}
+
+function updateChart(currentA, h) {
+    const ctx = document.getElementById('errorChart').getContext('2d');
+    const labels = [];
+    const frustumErrors = [];
+    const trapezoidErrors = [];
+
+    // b값을 0부터 20까지 변화시키며 오차 추이 계산
+    for (let bVal = 0; bVal <= 20; bVal += 2) {
+        labels.push(`b=${bVal}`);
+        // 뿔대 오차: (a-b)^2 / 6 * h
+        frustumErrors.push((Math.pow(currentA - bVal, 2) / 6) * h);
+        // 사다리꼴 오차: 언제나 0 (산술평균 공식이 정답이므로)
+        trapezoidErrors.push(0);
+    }
+
+    if (myChart) { myChart.destroy(); }
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '뿔대 부피 오차 (3D)',
+                data: frustumErrors,
+                borderColor: 'red',
+                fill: false,
+                tension: 0.1
+            }, {
+                label: '사다리꼴 넓이 오차 (2D)',
+                data: trapezoidErrors,
+                borderColor: 'blue',
+                borderDash: [5, 5],
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: { display: true, text: '변의 길이 변화에 따른 오차 비교' }
+            }
+        }
+    });
 }
 </script>
 </body>
